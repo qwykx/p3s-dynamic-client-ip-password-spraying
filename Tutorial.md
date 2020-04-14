@@ -26,6 +26,8 @@ Please connect to the vulnerable server from `RESOURCES`.
 * connect to port https://{PASSWORD SPRAYING SERVER}/
 * password changes every hour (60 minutes)
 
+![spray.png](media/challenge/png/2f58039b-6fb3-4850-bab1-5120ba448ed8.png)
+
 ## Fail2Ban
 Fail2Ban is an intrusion prevention software framework that protects computer servers from brute-force attacks. Fail2Ban operates by monitoring log files for `failed login attempts` and blocks selected IP addresses that may belong to hosts that are trying to breach the system's security. 
 
