@@ -18,7 +18,9 @@ In this python3 coding exercise you will learn how to connect and authenticate t
 ## Learn how to
 
 * bypass common intrusion prevention systems used for web services
+* setup Tor and use it within python
 * perform a password spraying attack
+* write an external Metasploit module
 
 ## Tasks
 
@@ -26,6 +28,7 @@ In this python3 coding exercise you will learn how to connect and authenticate t
 * Task 2: Analyze the Challenge 
 * Task 3: Tor installation and setup
 * Task 4: Password Spraying using Python
+* Task 5: Writing a Metasploit Module
 
 ## Preparation
 
@@ -100,7 +103,7 @@ curl: (28) Failed to connect to pwspray.vm.vuln.land port 80: Connection timed o
 
 # Analyzing the Challenge
 
-Your challenge isn't to crack a password to a given user as modern services are mostly protected by blocking a users login for a period of time if the password was entered wrong a couple of times. Therefore you'll make use of an attack called **password spraying**.
+Your challenge isn't to crack a password to a given user as modern services are mostly protected by blocking a users login for some time if the password was entered wrong a couple of times. Therefore you'll make use of an attack called **password spraying**.
 
 ## Step 1
 
@@ -131,7 +134,7 @@ Your challenge is to find the correct username to the given password in an autom
 
 # Tor setup
 
-To prevent your IP from getting blocked by intrusion prevention systems you can use `Tor` to change your public IP every now and then.
+To prevent your IP from getting blocked by intrusion prevention systems you can use `Tor` to change your public IP now and then.
 
 ## Step 1
 
@@ -198,7 +201,7 @@ def renew_ip():
 
 ### Check your IP
 
-You can check your IP by sending a GET-Request to http://icanhazip.com. In order to use the socket created by *Tor* use *requests* and set its property *proxies* accordingly.
+You can check your IP by sending a GET-Request to http://icanhazip.com. To use the socket created by *Tor* use *requests* and set its property *proxies* accordingly.
 
 ```python
 import requests
@@ -212,11 +215,11 @@ def get_ip():
 
 ## Step 2
 
-### Start the Attack
+### Try a login
 
 Write a function *try_login(credentials)* that takes a tuple as an argument containing the *username* and the *password*. Send a GET-Request using [requests](https://requests.readthedocs.io/en/master/).  You'll have to provide three arguments to your request: *url*, *proxies* and *auth*.
 
-Make sure to return the credentials plus the status code of the request in order to track down a successful login. 
+Make sure to return the credentials plus the status code of the request to track down a successful login. 
 
 ```python
 import requests
@@ -261,3 +264,87 @@ with ThreadPoolExecutor() as executor:
         
 ```
 
+## Step 4
+
+### Password Spraying
+
+Now as you have all your need code wrap the code together and try to capture the flag. Make sure to update the **password** according to https://pwspray.vm.vuln.land/.
+
+When you add some `print` statements to your code it could look somehow like this.
+
+LOG:
+
+```bash
+-- Trying users: 140000 to 140009
+New IP received: 185.220.101.160
+
+(('user_140000', 'password'), 401)
+(('user_140001', 'password'), 401)
+(('user_140002', 'password'), 401)
+(('user_140003', 'password'), 401)
+(('user_140004', 'password'), 401)
+(('user_140005', 'password'), 401)
+(('user_140006', 'password'), 401)
+(('user_140007', 'password'), 401)
+(('user_140008', 'password'), 401)
+(('user_140009', 'password'), 401)
+...
+(('user_140500', 'password'), 401)
+
+-- Succesful logins:
+(('user_140237', 'poassword'), 200)
+
+Total time needed: 0:08:54.442807
+```
+
+When you've successfully grabbed valid credentials head over to http://pwspray.vm.vuln.land/ and login manually. You should see the following output.
+
+![Succesfull password spray](/media/challenge/png/successful-spray.png)
+
+# Writing a Metasploit Module in Python
+
+[Metasploit](https://www.metasploit.com/) is a widely used penetration testing framework backed by a community of over 200'000 users and contributors. Metasploits exploit database consists of more than 1'300 exploits and more than 2'000 modules making it probably the most impactful penetration testing tool available today. 
+
+## Step 1
+
+### Prepare your code
+
+Before you start to write your module, make sure you have completed the *Password Spraying* task as you'll need the code you've written for it.
+
+## Step 2
+
+### Install the dependencies
+
+As you won't run the metasploit module within a virtual environment you'll have to install the dependencies globally. 
+
+1. Make sure you aren't within a virtual environment
+
+   The following terminal output shows an example **being within a virtual enviroment**, you can notice it by the string within the parentheses before *root@hlkali*.
+
+   ```bash
+   (p3s-dynamic-client-ip-password-spraying-J5q6zjd1) root@hlkali:/opt/git/p3s-dynamic-client-ip-password-spraying# 
+   ```
+
+   The following terminal output is **not within a virtual environment**.
+
+   ```bash
+   root@hlkali:/opt/git/p3s-dynamic-client-ip-password-spraying# 
+   ```
+
+2. Create a subfolder within the tasks folder
+
+   ```bash
+   cd /opt/git/p3s-dynamic-client-ip-password-spraying
+   mkdir metasploit-module
+   cd metasploit-module
+   ```
+
+3. Install *requests and stem*
+
+   ```bash
+   pip install requests stem
+   ```
+
+## Step 3
+
+TODO: Complete Metasploit Tutorial
