@@ -1,5 +1,5 @@
 # Introduction
-In this python3 coding exercise you will learn how to connect and authenticate to a `http` service in python3.
+In this python3 coding exercise you will learn how to connect and authenticate to an `http` service in python3.
 
 ```
                             +--------------+--------------+
@@ -19,7 +19,7 @@ In this python3 coding exercise you will learn how to connect and authenticate t
 
 * bypass common intrusion prevention systems used for web services
 * setup Tor and use it within python
-* perform a password spraying attack on a HTTP service
+* perform a password spraying attack on an HTTP service
 
 ## Tasks
 
@@ -39,11 +39,9 @@ pipenv --python 3 sync
 pipenv --python 3 shell
 ```
 
-
-
 # Analyzing Fail2Ban
 
-![Fail2Ban-Service](/media/challenge/png/fail2ban.png)
+![Fail2Ban-Service](../media/challenge/png/fail2ban.png)
 
 ## Step 1
 
@@ -119,7 +117,7 @@ The password spraying server has some hints for you prepared when heading to htt
 3. The services are **fail2ban** protected with a 10 minutes lockout period
 4. Every service has its unique user database (they are not shared)
 
-![Password Spraying Server](/media/challenge/png/password-spraying-server.png)
+![Password Spraying Server](../media/challenge/png/password-spraying-server.png)
 
 **Hint: ** The server runs two different websites your *attack target* will be running on port `80` not on port `443` and isn't using SSL! 
 
@@ -294,4 +292,4 @@ Total time needed: 0:08:54.442807
 
 When you've successfully grabbed valid credentials head over to http://pwspray.vm.vuln.land/ and login manually. You should see the following output.
 
-![Succesfull password spray](/media/challenge/png/successful-spray.png)
+![Succesfull password spray](../media/challenge/png/successful-spray.png)
