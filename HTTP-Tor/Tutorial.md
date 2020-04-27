@@ -1,5 +1,5 @@
 # Introduction
-In this python3 coding exercise you will learn how to connect and authenticate to an `http` service in python3.
+In this python3 coding exercise you will learn how to connect and authenticate to an `http` service in python3 using Tor sockets.
 
 ```
                             +--------------+--------------+
@@ -261,7 +261,7 @@ with ThreadPoolExecutor() as executor:
 
 ### Password Spraying
 
-Now as you have all your need code wrap the code together and try to capture the flag. Make sure to update the **password** according to https://pwspray.vm.vuln.land/.
+Now as you have all your needed code wrap the parts together and try to capture the flag. Make sure to update the **password** according to https://pwspray.vm.vuln.land/.
 
 When you add some `print` statements to your code it could look somehow like this.
 
