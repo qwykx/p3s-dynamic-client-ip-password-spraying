@@ -18,14 +18,14 @@ In this python3 coding exercise you will learn how to connect and authenticate t
 ## Learn how to
 
 * bypass common intrusion prevention systems used for web services
-* setup Tor and use it within python
+* crawl and use free proxies for HTTP requests
 * perform a password spraying attack on an HTTP service
 
 ## Tasks
 
 * Task 1: Analyze the behavior of Fail2Ban
 * Task 2: Analyze the Challenge 
-* Task 3: Tor installation and setup
+* Task 3: Proxy Crawling
 * Task 4: Password Spraying using Python
 
 ## Preparation
@@ -34,7 +34,7 @@ In this python3 coding exercise you will learn how to connect and authenticate t
 mkdir -p /opt/git
 cd /opt/git
 git clone https://github.com/ibuetler/p3s-dynamic-client-ip-password-spraying.git
-cd /opt/git/p3s-dynamic-client-ip-password-spraying/HTTP-Tor
+cd /opt/git/p3s-dynamic-client-ip-password-spraying/HTTP-Proxy
 pipenv --python 3 sync
 pipenv --python 3 shell
 ```
@@ -125,100 +125,141 @@ The password spraying server has some hints for you prepared when heading to htt
 
 Your challenge is to find the correct username to the given password in an automated manner. The range of users is limited to 500 users to speed things up.
 
-# Tor setup
+# Proxy Scrape
 
-To prevent your IP from getting blocked by intrusion prevention systems you can use `Tor` to change your public IP now and then.
+To prevent your IP from getting blocked by intrusion prevention systems you can use `Proxies` to change your public IP now and then. There are many free proxies available out there but if you are planning to use them in a "professional" manner you should consider buying dedicated proxies or rotating proxy services.
+
+**Warning:** Free proxies aren't reliable, it's very likely that only a few dozens of thousands of proxies even work.
 
 ## Step 1
 
-### Install Tor
+### Make yourself familiar with *proxyscrape*
 
-```bash
-apt install tor
-```
+Proxyscrape is a small python library written to scrape free proxies from various sites. You can either use proxyscrape or write your own crawler which isn't covered in this Tutorial.
+
+[Proxy Scrape Library](https://github.com/jaredlgillespie/proxyscrape)
 
 ## Step 2
 
-### Configuration
+### Using Proxyscrape
 
-As you want to change your IP from time to time you have to configure *Tor* allowing yourself to request identity renewal.
+To start using proxyscrape simply import *create_collector* from proxyscrape.
 
-``` bash
-nano /etc/tor/torrc
-```
-
-Add the following two lines to the open file.
-
-```
-ControlPort 9051
-CookieAuthentication 1
+```python
+from proxyscrape import create_collector
 ```
 
 ## Step 3
 
-### Testing
+### Define a collector
 
-Before you can make a request over *Tor* you'll have to start the service.
+Proxyscrape uses collectors as an interface to retrieve proxies. Think about them as a filter for different proxy types. 
 
-``` bash
-service tor start
+As *requests* can use **http** and **socks5** proxies a collector to retrieve http and socks5 proxies.
+
+``` python
+collector = create_collector('http-collector', ['http', 'socks5'])
 ```
 
-Now test your *Tor setup* with the following curl.
+## Step 4
 
-```bash
-curl --socks5 localhost:9050 --socks5-hostname localhost:9050 -s https://check.torproject.org/ | cat | grep -m 1 Congratulations | xargs
+### Retrieve proxies
+
+Use the collector you've just created to retrieve the proxies
+
+``` python
+proxies = collector.get_proxies()
 ```
 
-You should get `Congratulations. This browser is configured to use Tor`.
+## Step 5
+
+### Write a function
+
+Now write a function to retrieve the proxies and return them as a list. 
+
+**Hint:** The *requests* library expects the proxy in the following format `{'http': 'protocol://IPAddress:Port'}` whereas *protocol* has to be replaced with the proxy type either http or socks5h.
+
+```python
+def get_proxies():
+    # your code goes here
+```
 
 # Password Spraying HTTP Basic Authentication
 
 ## Step 1
 
-### Control Tor
+### Write a login function
 
-Write a function *renew_ip()* that uses [Stem](https://stem.torproject.org/index.html) to get a new IP-Address.  With Stem you can control your *Tor socket* using the port we've configured in *Tor setup -> Step 2*. The `c.signal(Signal.NEWNYM)` creates a new circuit (route) but does not necessarily change your public IP-Address, you have to make sure you've received a new IP-Address yourself.
+Write a function *try_login()* that takes the four parameters *url, proxy, user* and *password* as an argument.
 
  ```python
-from stem import Signal
-from stem.control import Controller
-
-def renew_ip():
-	with Controller.from_port(port = 9051) as c:
-		c.authenticate(password='password')
-		c.signal(Signal.NEWNYM)
-	
-	# Your code goes here, make sure to get an "unused" IP ;)
- ```
-
-### Check your IP
-
-You can check your IP by sending a GET-Request to http://icanhazip.com. To use the socket created by *Tor* use *requests* and set its property *proxies* accordingly.
-
-```python
 import requests
 
-def get_ip():
-    response = requests.get("http://icanhazip.com"), proxies={'http': 'socks5h://127.0.0.1:9050'})
-    return response.text
-
-# returns the IP as a string
-```
+def try_login(url, proxy, user, password):
+    # your code goes here
+    
+ ```
 
 ## Step 2
 
-### Try a login
+### Write a runner function
 
-Write a function *try_login(credentials)* that takes a tuple as an argument containing the *username* and the *password*. Send a GET-Request using [requests](https://requests.readthedocs.io/en/master/).  You'll have to provide three arguments to your request: *url*, *proxies* and *auth*.
+As you'll be going to parallelize the requests later you should extract the logic of issuing a new request into a separate function.
 
-Make sure to return the credentials plus the status code of the request to track down a successful login. 
+Write a *runner()* function that takes a dictionary as an argument. The dictionary should contain the current username (number) and the proxies as a list.
+
+**Explanation:** You cannot pass multiple arguments to the function you are calling from within *ThreadPoolExecutor*.
 
 ```python
-import requests
-
-def try_login(credentials):
+def runner(params):
+    # unpacking parameters
+    user = params['user']
+    proxies = params['proxies']
+    
     # Your code goes here
+```
+
+### Picking a random proxy
+
+Your runner function is responsible to pick a random proxy from your proxy list. You can create a random integer within a given range using:
+
+```python
+import random
+
+random_index = random.randint(0, len(proxy_list) - 1)
+```
+
+Access the entry in the list with:
+
+```python
+proxy = proxy_list[random_index]
+```
+
+### Handling errors
+
+As your request might fail due to a blocked IP-Address you have to handle that case within your *runner()* function. Pack your logic into a `while True:` block and retry your request until it's successful.
+
+**Hint**: Typically you'll receive an HTTP error 429 when your IP-Address gets blocked. You should remove the proxy that has been blocked from your list to avoid unnecessary requests.
+
+```python
+def runner(params):
+    ...
+    while True:
+        # your code goes here
+    
+```
+
+### Calling the runner function
+
+The *runner()* function will be called as follows:
+
+```python
+params = {
+    'user': 123 # integer
+    'proxies': proxies # list
+}
+
+runner(params)
 ```
 
 ## Step 3
@@ -227,50 +268,28 @@ def try_login(credentials):
 
 You can speed up your *password spraying program* by parallelizing your requests using [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html).
 
-As we have can only have as many simultaneous threads as Fail2Ban allows failed login attempts from the same IP we have to limit the tasks running.
+Fiddle around with the *max_workers* parameter as this depends from system to system.
 
 ```python
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
-with ThreadPoolExecutor() as executor:
-    current_user = 140000
-    end_user = 140500
+with ThreadPoolExecutor(max_workers=50) as executor:
+    print("--------- Start spraying -----------")
+    tasks = {executor.submit(runner, user) for user in users}
     
-    while current_user <= end_user:
-        tasks = list()
-        
-        # limit running threads (batching), change range according to Fail2Ban policy
-        for offset in range(0, 10)
-        	current_user += 1
-        	tasks.append(
-            	executor.submit(
-                	try_login, (f'user_{current_user}', 'password')
-                )
-            )
-            current_user += 1
-        
-        renew_IP()
-        
-        # wait for the tasks to complete
-        for task in as_completed(tasks):
-            print(task.result())
-        
+    for task in as_completed(tasks):
+        print(task.result())
 ```
 
 ## Step 4
 
 ### Password Spraying
 
-Now as you have all your need code wrap the code together and try to capture the flag. Make sure to update the **password** according to https://pwspray.vm.vuln.land/.
+Now as you have all your needed code wrap the parts together and try to capture the flag. Make sure to update the **password** according to https://pwspray.vm.vuln.land/.
 
 When you add some `print` statements to your code it could look somehow like this.
 
 LOG:
 
 ```bash
--- Trying users: 140000 to 140009
-New IP received: 185.220.101.160
-
 (('user_140000', 'password'), 401)
 (('user_140001', 'password'), 401)
 (('user_140002', 'password'), 401)
@@ -287,7 +306,7 @@ New IP received: 185.220.101.160
 -- Succesful logins:
 (('user_140237', 'password'), 200)
 
-Total time needed: 0:08:54.442807
+Total time needed: 0:04:54.442807
 ```
 
 When you've successfully grabbed valid credentials head over to http://pwspray.vm.vuln.land/ and login manually. You should see the following output.
