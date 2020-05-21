@@ -35,7 +35,7 @@ pipenv --python 3 shell
 
 ### Prepare your code
 
-Before you start to write your module, make sure you have completed the *HTTP Password Spraying* task as you'll need the code you've written for it.
+Before you start to write your module, make sure you have completed the *HTTP Password Spraying Tor* task as you'll need the code you've written for it.
 
 ## Step 2
 
