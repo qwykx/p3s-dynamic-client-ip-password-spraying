@@ -198,6 +198,7 @@ metadata = {
     ],
     'date': '2020-04-20',
     'license': 'MIT',
+    'references':[],
     'type': 'single_scanner',
     'options': {
         'rhost': {'type': 'address', 'description': 'Target address', 'required': True, 'default': None}
@@ -278,6 +279,7 @@ As you've understood the basic structure of a Metasploit module you can now star
        ],
        'date': '2020-04-20',
        'license': 'MIT',
+       'references':[],
        'type': 'single_scanner',
        'options': {
            'rhost': {'type': 'address', 'description': 'Target address', 'required': True, 'default': None},
@@ -374,6 +376,8 @@ As you've understood the basic structure of a Metasploit module you can now star
    ```bash
    use exploit/http/passwordspray/spray
    ```
+
+   If metasploit fails to load the module with `[-] No results from search` try to reload the modules with `reload_all`
 
    LOG:
 
