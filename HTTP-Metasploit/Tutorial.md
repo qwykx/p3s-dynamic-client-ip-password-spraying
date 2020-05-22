@@ -231,16 +231,16 @@ if __name__ == '__main__':
 
 As you've understood the basic structure of a Metasploit module you can now start to write your own module based on the *HTTP password spraying task*.
 
-1. Metasploit expects your module within the folder `/root/.msf4/modules/exploits/moduledir/`. 
+1. Metasploit expects your module within the folder `~/.msf4/modules/exploits/moduledir/`. 
 
   ```bash
-  mkdir -p /root/.msf4/modules/exploits/http/passwordspray
-  cd /root/.msf4/modules/exploits/http/passwordspray
+  mkdir -p ~/.msf4/modules/exploits/http/passwordspray
+  cd ~/.msf4/modules/exploits/http/passwordspray
   touch spray.py
   chmod +x spray.py
   ```
 
-2. Open the newly created file from `/root/.msf4/modules/exploits/http/passwordspray/spray.py` in your preferred editor
+2. Open the newly created file from `~/.msf4/modules/exploits/http/passwordspray/spray.py` in your preferred editor
 
 3. Import all needed modules and handle import errors as in *Imports* within *Metasploit Module Theory*
 
